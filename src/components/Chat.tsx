@@ -4,9 +4,9 @@ import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, limit 
 import { db, auth } from '../firebase';
 import { ChatMessage } from '../types';
 import Markdown from 'react-markdown';
-import { Send, Bot, User, Sparkles, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Loader2, X } from 'lucide-react';
 
-export default function Chat() {
+export default function Chat({ onClose }: { onClose?: () => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -95,10 +95,20 @@ export default function Chat() {
   };
 
   return (
-    <div className="w-80 border-l border-stone-200 bg-stone-50 flex flex-col h-full">
-      <div className="p-4 border-b border-stone-200 bg-white flex items-center gap-2">
-        <Sparkles size={18} className="text-emerald-600" />
-        <h2 className="font-medium text-stone-800">AI Assistant</h2>
+    <div className="w-full md:w-80 border-l border-stone-200 bg-stone-50 flex flex-col h-full">
+      <div className="p-4 border-b border-stone-200 bg-white flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles size={18} className="text-emerald-600" />
+          <h2 className="font-medium text-stone-800">AI Assistant</h2>
+        </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden p-1.5 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-all"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
