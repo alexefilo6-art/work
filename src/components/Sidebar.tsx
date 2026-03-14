@@ -7,9 +7,10 @@ import { Plus, FileText, Trash2, LogOut, User as UserIcon, UserPlus, X } from 'l
 interface SidebarProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ selectedId, onSelect }: SidebarProps) {
+export default function Sidebar({ selectedId, onSelect, onClose }: SidebarProps) {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -81,19 +82,29 @@ export default function Sidebar({ selectedId, onSelect }: SidebarProps) {
   };
 
   return (
-    <div className="w-64 border-r border-stone-200 bg-stone-50 flex flex-col h-full relative">
+    <div className="w-full md:w-64 border-r border-stone-200 bg-stone-50 flex flex-col h-full relative">
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-serif font-bold text-stone-900">CollabEdit</h1>
-          {isAdmin && (
-            <button
-              onClick={() => setShowInviteModal(true)}
-              className="p-2 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-              title="Invite participants"
-            >
-              <UserPlus size={18} />
-            </button>
-          )}
+          <div className="flex items-center gap-1">
+            {isAdmin && (
+              <button
+                onClick={() => setShowInviteModal(true)}
+                className="p-2 text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                title="Invite participants"
+              >
+                <UserPlus size={18} />
+              </button>
+            )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="md:hidden p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-200/50 rounded-lg transition-all"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
         </div>
         <button
           onClick={createNewDoc}
