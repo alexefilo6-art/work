@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email == "filoama36@gmail.com";
+    }
+
+    function isInvited() {
+      return isAdmin() || (isAuthenticated() && exists(/databases/$(database)/documents/invites/$(request.auth.token.email)));
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Invites collection
+    match /invites/{email} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Documents
+    match /documents/{docId} {
+      allow read, write: if isInvited();
+      
+      function isValidDocument(data) {
+        return data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+               data.content is string && data.content.size() < 50000 &&
+               data.createdAt is timestamp &&
+               data.updatedAt is timestamp;
+      }
+      
+      allow create: if isInvited() && isValidDocument(request.resource.data);
+      allow update: if isInvited() && isValidDocument(request.resource.data);
+      allow delete: if isInvited();
+    }
+
+    // Chat history
+    match /users/{userId}/chatHistory/{msgId} {
+      allow read, write: if isOwner(userId) && isInvited();
+    }
+  }
+}

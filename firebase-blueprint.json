@@ -1,0 +1,87 @@
+{
+  "entities": {
+    "Document": {
+      "title": "Document",
+      "description": "A collaborative email or note document.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the document."
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content of the document."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the document was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the document was last updated."
+        },
+        "lastModifiedBy": {
+          "type": "string",
+          "description": "UID of the last user who edited."
+        }
+      },
+      "required": ["title", "content", "createdAt", "updatedAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "A message in the AI chat sidebar.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["user", "model"],
+          "description": "The role of the message sender."
+        },
+        "content": {
+          "type": "string",
+          "description": "The text content of the message."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the message was sent."
+        }
+      },
+      "required": ["role", "content", "timestamp"]
+    },
+    "Invite": {
+      "title": "Invite",
+      "description": "An invitation for a user to join the app.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "The email of the invited user."
+        },
+        "invitedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the invite was sent."
+        }
+      },
+      "required": ["email", "invitedAt"]
+    }
+  },
+  "firestore": {
+    "/documents/{docId}": {
+      "schema": "Document",
+      "description": "Collection of collaborative documents."
+    },
+    "/users/{userId}/chatHistory/{msgId}": {
+      "schema": "ChatMessage",
+      "description": "AI chat history for each user."
+    },
+    "/invites/{inviteId}": {
+      "schema": "Invite",
+      "description": "Collection of invited users."
+    }
+  }
+}
