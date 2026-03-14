@@ -93,7 +93,7 @@ export default function Editor({ documentId }: EditorProps) {
             type="text"
             value={localTitle}
             onChange={handleTitleChange}
-            className="w-full text-2xl font-serif font-medium focus:outline-none placeholder-stone-300"
+            className="w-full text-xl md:text-2xl font-serif font-medium focus:outline-none placeholder-stone-300 bg-transparent"
             placeholder="Document Title"
           />
           <div className="flex items-center gap-4 mt-1 text-xs text-stone-400">
@@ -116,7 +116,7 @@ export default function Editor({ documentId }: EditorProps) {
           ref={textareaRef}
           value={localContent}
           onChange={handleContentChange}
-          className="absolute inset-0 w-full h-full p-8 font-mono text-base leading-relaxed resize-none focus:outline-none bg-stone-50/30"
+          className="absolute inset-0 w-full h-full p-4 md:p-8 font-mono text-base leading-relaxed resize-none focus:outline-none bg-stone-50/30"
           placeholder="Start writing your email or note here..."
         />
       </div>
