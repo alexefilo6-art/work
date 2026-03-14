@@ -13,10 +13,11 @@ export default function Chat() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!auth.currentUser) return;
+    const user = auth.currentUser;
+    if (!user) return;
 
     const q = query(
-      collection(db, 'users', auth.currentUser.uid, 'chatHistory'),
+      collection(db, 'users', user.uid, 'chatHistory'),
       orderBy('timestamp', 'asc'),
       limit(50)
     );
@@ -27,10 +28,12 @@ export default function Chat() {
         ...doc.data()
       })) as ChatMessage[];
       setMessages(msgs);
+    }, (error) => {
+      console.error("Firestore error in Chat:", error);
     });
 
     return () => unsub();
-  }, []);
+  }, [auth.currentUser]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
@@ -52,8 +55,14 @@ export default function Chat() {
         timestamp: serverTimestamp()
       });
 
+      // Check for API Key
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('Gemini API Key is missing. Please check your environment configuration.');
+      }
+
       // Call Gemini
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+      const ai = new GoogleGenAI({ apiKey });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: userMsg,
@@ -71,8 +80,15 @@ export default function Chat() {
         timestamp: serverTimestamp()
       });
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Chat error:', err);
+      // Add a temporary error message to the chat
+      setMessages(prev => [...prev, {
+        id: 'error-' + Date.now(),
+        role: 'model',
+        content: `âš ï¸ **Error**: ${err.message || 'Failed to get a response from AI.'}`,
+        timestamp: new Date()
+      } as any]);
     } finally {
       setIsLoading(false);
     }
