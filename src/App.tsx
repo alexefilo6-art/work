@@ -13,6 +13,8 @@ export default function App() {
   const [isInvited, setIsInvited] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -98,12 +100,83 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen w-full flex overflow-hidden bg-white font-sans text-stone-900">
-      <Sidebar selectedId={selectedDocId} onSelect={setSelectedDocId} />
-      <main className="flex-1 flex flex-col min-w-0">
-        <Editor documentId={selectedDocId} />
-      </main>
-      <Chat />
+    <div className="h-screen w-full flex flex-col md:flex-row overflow-hidden bg-white font-sans text-stone-900">
+      {/* Mobile Header */}
+      <header className="md:hidden h-14 border-b border-stone-200 flex items-center justify-between px-4 bg-white shrink-0 z-30">
+        <button 
+          onClick={() => setIsSidebarOpen(true)}
+          className="p-2 text-stone-500 hover:bg-stone-50 rounded-lg"
+          aria-label="Open Sidebar"
+        >
+          <Users size={20} />
+        </button>
+        <div className="flex items-center gap-2">
+          <Zap className="text-stone-900 fill-stone-900" size={18} />
+          <span className="font-serif font-bold text-lg tracking-tight">CollabEdit</span>
+        </div>
+        <button 
+          onClick={() => setIsChatOpen(true)}
+          className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg"
+          aria-label="Open AI Chat"
+        >
+          <Sparkles size={20} />
+        </button>
+      </header>
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar with mobile overlay */}
+        <AnimatePresence>
+          {isSidebarOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSidebarOpen(false)}
+              className="fixed inset-0 bg-stone-900/20 backdrop-blur-sm z-40 md:hidden"
+            />
+          )}
+        </AnimatePresence>
+        
+        <div className={`
+          fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-in-out bg-white
+          md:relative md:translate-x-0 md:z-0 md:w-64
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
+          <Sidebar 
+            selectedId={selectedDocId} 
+            onSelect={(id) => {
+              setSelectedDocId(id);
+              setIsSidebarOpen(false);
+            }} 
+            onClose={() => setIsSidebarOpen(false)}
+          />
+        </div>
+
+        <main className="flex-1 flex flex-col min-w-0 bg-white">
+          <Editor documentId={selectedDocId} />
+        </main>
+
+        {/* Chat with mobile overlay */}
+        <AnimatePresence>
+          {isChatOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsChatOpen(false)}
+              className="fixed inset-0 bg-stone-900/20 backdrop-blur-sm z-40 md:hidden"
+            />
+          )}
+        </AnimatePresence>
+
+        <div className={`
+          fixed inset-y-0 right-0 z-50 w-80 transform transition-transform duration-300 ease-in-out bg-white
+          md:relative md:translate-x-0 md:z-0
+          ${isChatOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+        `}>
+          <Chat onClose={() => setIsChatOpen(false)} />
+        </div>
+      </div>
     </div>
   );
 }
